@@ -1,0 +1,454 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GameZone Pro</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+ margin:0;
+ font-family:Arial,sans-serif;
+ background:#080b16;
+ color:white;
+}
+header{
+ background:#11182b;
+ padding:18px;
+ display:flex;
+ justify-content:space-between;
+ align-items:center;
+ border-bottom:2px solid #00eaff;
+}
+.logo{
+ font-size:23px;
+ font-weight:bold;
+ color:#00eaff;
+}
+.logo span{color:#ff3d81}
+.coins{color:#ffe45c;font-weight:bold}
+.hero{
+ padding:28px 18px;
+ text-align:center;
+ background:linear-gradient(135deg,#15234a,#42134e,#10182c);
+}
+.hero h1{font-size:32px;margin:5px}
+.hero p{color:#ddd}
+.hero button,.play-btn{
+ background:linear-gradient(90deg,#00d9ff,#6b4dff);
+ border:0;
+ color:white;
+ padding:12px 22px;
+ border-radius:8px;
+ font-weight:bold;
+ cursor:pointer;
+}
+.search{
+ padding:15px;
+}
+.search input{
+ width:100%;
+ padding:13px;
+ border-radius:10px;
+ border:1px solid #00eaff;
+ background:#151c30;
+ color:white;
+ font-size:16px;
+}
+h2{padding:0 16px;color:#00eaff}
+.games{
+ display:grid;
+ grid-template-columns:repeat(2,1fr);
+ gap:13px;
+ padding:15px;
+}
+.card{
+ background:#151d32;
+ border:1px solid #283957;
+ border-radius:13px;
+ overflow:hidden;
+ text-align:center;
+ padding-bottom:15px;
+}
+.game-icon{
+ font-size:53px;
+ padding:22px 5px;
+ background:linear-gradient(135deg,#263c67,#3c2055);
+}
+.card h3{margin:12px 5px}
+.card p{font-size:12px;color:#aaa}
+.play-btn{padding:10px 20px}
+#gameArea{
+ display:none;
+ margin:15px;
+ padding:18px;
+ background:#151d32;
+ border:1px solid #00eaff;
+ border-radius:12px;
+ text-align:center;
+}
+#gameArea button{
+ margin:5px;
+ padding:11px 16px;
+ background:#604cff;
+ color:white;
+ border:0;
+ border-radius:8px;
+ cursor:pointer;
+}
+#gameArea input{
+ padding:10px;
+ width:80%;
+ border-radius:7px;
+ border:0;
+}
+#gameArea canvas{
+ background:#050a12;
+ max-width:100%;
+ border:2px solid #00eaff;
+ border-radius:8px;
+ touch-action:none;
+}
+footer{
+ text-align:center;
+ padding:25px;
+ color:#888;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+ <div class="logo">GAMEZONE <span>PRO</span></div>
+ <div class="coins">⭐ Player</div>
+</header>
+
+<section class="hero">
+ <h1>WELCOME TO GAMEZONE PRO</h1>
+ <p>Play Games • Have Fun • Beat Your High Score</p>
+ <button onclick="document.getElementById('games').scrollIntoView()">
+ PLAY NOW 🎮
+ </button>
+</section>
+
+<div class="search">
+ <input id="search" placeholder="🔍 Search your game..."
+ oninput="filterGames()">
+</div>
+
+<h2>🔥 POPULAR GAMES</h2>
+
+<div class="games" id="games">
+
+<div class="card" data-name="snake">
+ <div class="game-icon">🐍</div>
+ <h3>Snake Game</h3>
+ <p>Eat food and grow longer</p>
+ <button class="play-btn" onclick="startGame('snake')">PLAY</button>
+</div>
+
+<div class="card" data-name="memory">
+ <div class="game-icon">🧠</div>
+ <h3>Memory Game</h3>
+ <p>Find matching pairs</p>
+ <button class="play-btn" onclick="startGame('memory')">PLAY</button>
+</div>
+
+<div class="card" data-name="rps">
+ <div class="game-icon">✊</div>
+ <h3>Rock Paper Scissors</h3>
+ <p>Beat the computer</p>
+ <button class="play-btn" onclick="startGame('rps')">PLAY</button>
+</div>
+
+<div class="card" data-name="guess">
+ <div class="game-icon">🔢</div>
+ <h3>Number Guess</h3>
+ <p>Guess the secret number</p>
+ <button class="play-btn" onclick="startGame('guess')">PLAY</button>
+</div>
+
+<div class="card" data-name="tap">
+ <div class="game-icon">🎯</div>
+ <h3>Tap Challenge</h3>
+ <p>Tap as fast as you can</p>
+ <button class="play-btn" onclick="startGame('tap')">PLAY</button>
+</div>
+
+<div class="card" data-name="ttt">
+ <div class="game-icon">❌</div>
+ <h3>Tic Tac Toe</h3>
+ <p>Play against a friend</p>
+ <button class="play-btn" onclick="startGame('ttt')">PLAY</button>
+</div>
+
+</div>
+
+<div id="gameArea">
+ <h2 id="gameTitle">Game</h2>
+ <div id="gameContent"></div>
+ <br>
+ <button onclick="closeGame()">⬅ BACK TO GAMES</button>
+</div>
+
+<footer>
+ <h3>🎮 GAMEZONE PRO</h3>
+ <p>Made with ❤️ by Nikhil</p>
+ <p>© 2026 GameZone Pro</p>
+</footer>
+
+<script>
+let timer=null;
+let snakeTimer=null;
+
+function filterGames(){
+ let q=document.getElementById("search").value.toLowerCase();
+ document.querySelectorAll(".card").forEach(card=>{
+  card.style.display=card.dataset.name.includes(q)?"block":"none";
+ });
+}
+
+function startGame(game){
+ clearInterval(timer);
+ clearInterval(snakeTimer);
+
+ let area=document.getElementById("gameArea");
+ let content=document.getElementById("gameContent");
+ area.style.display="block";
+ area.scrollIntoView({behavior:"smooth"});
+ content.innerHTML="";
+
+ const title={
+ snake:"🐍 Snake Game",
+ memory:"🧠 Memory Game",
+ rps:"✊ Rock Paper Scissors",
+ guess:"🔢 Number Guess",
+ tap:"🎯 Tap Challenge",
+ ttt:"❌ Tic Tac Toe"
+ };
+ document.getElementById("gameTitle").innerText=title[game];
+
+ if(game==="guess") guessGame();
+ if(game==="rps") rpsGame();
+ if(game==="memory") memoryGame();
+ if(game==="tap") tapGame();
+ if(game==="ttt") tttGame();
+ if(game==="snake") snakeGame();
+}
+
+function closeGame(){
+ clearInterval(timer);
+ clearInterval(snakeTimer);
+ document.getElementById("gameArea").style.display="none";
+}
+
+// NUMBER GUESS
+function guessGame(){
+ let answer=Math.floor(Math.random()*100)+1;
+ let attempts=0;
+ gameContent.innerHTML=`
+ <p>1 से 100 के बीच नंबर पहचानो!</p>
+ <input type="number" id="guessInput" placeholder="Enter number">
+ <button onclick="checkGuess()">CHECK</button>
+ <p id="guessResult">शुभकामनाएँ!</p>
+ <p id="guessCount">Attempts: 0</p>`;
+
+ window.checkGuess=function(){
+  let n=Number(document.getElementById("guessInput").value);
+  if(!n || n<1 || n>100){
+   guessResult.innerText="1 से 100 के बीच नंबर डालो";
+   return;
+  }
+  attempts++;
+  guessCount.innerText="Attempts: "+attempts;
+  if(n===answer){
+   guessResult.innerText="🎉 सही जवाब! तुम जीत गए!";
+  }else if(n<answer){
+   guessResult.innerText="थोड़ा बड़ा नंबर डालो ⬆️";
+  }else{
+   guessResult.innerText="थोड़ा छोटा नंबर डालो ⬇️";
+  }
+ };
+}
+
+// ROCK PAPER SCISSORS
+function rpsGame(){
+ let choices=["Rock","Paper","Scissors"];
+ gameContent.innerHTML=`
+ <p>अपना चुनाव करो!</p>
+ <button onclick="rps('Rock')">✊ Rock</button>
+ <button onclick="rps('Paper')">✋ Paper</button>
+ <button onclick="rps('Scissors')">✌️ Scissors</button>
+ <h3 id="rpsResult">Ready?</h3>`;
+
+ window.rps=function(user){
+  let cpu=choices[Math.floor(Math.random()*3)];
+  let result=user===cpu?"Draw!":
+  (user==="Rock"&&cpu==="Scissors")||
+  (user==="Paper"&&cpu==="Rock")||
+  (user==="Scissors"&&cpu==="Paper")?"You Win!":"Computer Wins!";
+  rpsResult.innerText="You: "+user+" | Computer: "+cpu+" | "+result;
+ };
+}
+
+// MEMORY GAME
+function memoryGame(){
+ let nums=[1,2,3,4,1,2,3,4].sort(()=>Math.random()-.5);
+ let opened=[],matched=0;
+ gameContent.innerHTML=`
+ <p>एक जैसे नंबर वाले कार्ड मिलाओ!</p>
+ <div id="memoryGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px"></div>
+ <h3 id="memoryResult">Find all pairs!</h3>`;
+
+ nums.forEach((n,i)=>{
+  let b=document.createElement("button");
+  b.textContent="?";
+  b.style.height="60px";
+  b.onclick=()=>{
+   if(b.dataset.done||opened.some(x=>x.i===i)||opened.length===2)return;
+   b.textContent=n;
+   opened.push({i,n,b});
+   if(opened.length===2){
+    if(opened[0].n===opened[1].n){
+     opened.forEach(x=>x.b.dataset.done="yes");
+     matched++;
+     opened=[];
+     if(matched===4) memoryResult.innerText="🎉 You Win!";
+    }else{
+     let pair=opened;
+     setTimeout(()=>{
+      pair.forEach(x=>x.b.textContent="?");
+      opened=[];
+     },700);
+    }
+   }
+  };
+  memoryGrid.appendChild(b);
+ });
+}
+
+// TAP CHALLENGE
+function tapGame(){
+ let count=0,seconds=10,playing=false;
+ gameContent.innerHTML=`
+ <h3 id="tapTime">Time: 10</h3>
+ <h3 id="tapScore">Score: 0</h3>
+ <button id="tapButton">START</button>`;
+
+ tapButton.onclick=()=>{
+  if(!playing){
+   playing=true;count=0;seconds=10;
+   tapButton.textContent="TAP ME!";
+   tapScore.innerText="Score: 0";
+   timer=setInterval(()=>{
+    seconds--;
+    tapTime.innerText="Time: "+seconds;
+    if(seconds<=0){
+     clearInterval(timer);
+     playing=false;
+     tapButton.textContent="PLAY AGAIN";
+     tapTime.innerText="Time Over!";
+    }
+   },1000);
+  }else{
+   count++;
+   tapScore.innerText="Score: "+count;
+  }
+ };
+}
+
+// TIC TAC TOE
+function tttGame(){
+ let board=Array(9).fill("");
+ let turn="X",finished=false;
+ gameContent.innerHTML=`
+ <p id="tttStatus">Player X turn</p>
+ <div id="tttGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:6px;max-width:260px;margin:auto"></div>
+ <button onclick="startGame('ttt')">RESTART</button>`;
+
+ board.forEach((v,i)=>{
+  let b=document.createElement("button");
+  b.style.height="70px";
+  b.style.fontSize="25px";
+  b.onclick=()=>{
+   if(board[i]||finished)return;
+   board[i]=turn;b.textContent=turn;
+   let wins=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+   let won=wins.some(line=>line.every(x=>board[x]===turn));
+   if(won){
+    tttStatus.innerText="🎉 Player "+turn+" Wins!";
+    finished=true;
+   }else if(board.every(Boolean)){
+    tttStatus.innerText="Draw!";
+    finished=true;
+   }else{
+    turn=turn==="X"?"O":"X";
+    tttStatus.innerText="Player "+turn+" turn";
+   }
+  };
+  tttGrid.appendChild(b);
+ });
+}
+
+// SNAKE GAME
+function snakeGame(){
+ gameContent.innerHTML=`
+ <p>Arrow buttons से Snake चलाओ और खाना खाओ!</p>
+ <canvas id="snakeCanvas" width="300" height="300"></canvas>
+ <p id="snakeScore">Score: 0</p>
+ <div>
+ <button onclick="changeDir(0,-1)">⬆️</button><br>
+ <button onclick="changeDir(-1,0)">⬅️</button>
+ <button onclick="changeDir(1,0)">➡️</button><br>
+ <button onclick="changeDir(0,1)">⬇️</button>
+ </div>
+ <button onclick="startGame('snake')">RESTART</button>`;
+
+ let c=snakeCanvas,ctx=c.getContext("2d");
+ let snake=[{x:5,y:5}],dir={x:1,y:0};
+ let food={x:10,y:10},score=0,over=false;
+ function changeDir(x,y){
+  if(x===-dir.x&&y===-dir.y)return;
+  dir={x,y};
+ }
+ window.changeDir=changeDir;
+
+ document.onkeydown=function(e){
+  if(e.key==="ArrowUp")changeDir(0,-1);
+  if(e.key==="ArrowDown")changeDir(0,1);
+  if(e.key==="ArrowLeft")changeDir(-1,0);
+  if(e.key==="ArrowRight")changeDir(1,0);
+ };
+ function draw(){
+  if(over)return;
+  let head={x:snake[0].x+dir.x,y:snake[0].y+dir.y};
+  if(head.x<0||head.y<0||head.x>=15||head.y>=15||
+  snake.some(p=>p.x===head.x&&p.y===head.y)){
+   over=true;
+   ctx.fillStyle="white";
+   ctx.font="20px Arial";
+   ctx.fillText("GAME OVER",85,150);
+   return;
+  }
+  snake.unshift(head);
+  if(head.x===food.x&&head.y===food.y){
+   score++;
+   snakeScore.innerText="Score: "+score;
+   food={x:Math.floor(Math.random()*15),y:Math.floor(Math.random()*15)};
+  }else snake.pop();
+
+  ctx.clearRect(0,0,300,300);
+  ctx.fillStyle="#ff3d81";
+  ctx.fillRect(food.x*20,food.y*20,18,18);
+  ctx.fillStyle="#00eaff";
+  snake.forEach(p=>ctx.fillRect(p.x*20,p.y*20,18,18));
+ }
+ snakeTimer=setInterval(draw,150);
+}
+</script>
+
+</body>
+</html>
